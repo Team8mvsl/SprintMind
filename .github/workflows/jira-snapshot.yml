@@ -16,6 +16,7 @@ jobs:
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       JIRA_PROJECT_KEY: ${{ vars.JIRA_PROJECT_KEY }}
       SPRINTMIND_TEAM: ${{ vars.SPRINTMIND_TEAM }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
     steps:
       - name: Check out SprintMind
@@ -30,4 +31,8 @@ jobs:
         run: npm test
 
       - name: Read Jira and recommend assignments
-        run: node src/index.js
+        run: node src/index.js | tee sprintmind-output.json
+
+      - name: Post Project Assistant briefing to Teams
+        if: ${{ env.TEAMS_WEBHOOK_URL != '' }}
+        run: node src/post-teams-briefing.js sprintmind-output.json
