@@ -1,14 +1,20 @@
 # SprintMind
 
-SprintMind is a multi-agent project assistant. It reads Jira issues and recommends task assignments. GitHub and Microsoft Teams are isolated connectors, so future agents can use them without changing Jira logic.
+SprintMind is a multi-agent project assistant for Jira projects.
 
-## Architecture
+## Working architecture
 
 Jira / GitHub / Microsoft Teams -> connectors -> agents -> orchestrator
 
-Current flow: JiraClient -> JiraTicketAgent -> TaskAssignmentAgent -> JSON project and recommendation output.
+The current workflow runs these agents in order:
 
-Planned next: Risk Analysis, a Teams connector, Project Assistant, and an Orchestrator.
+1. Ticket Agent reads and normalizes SCRUM Jira issues.
+2. Task Assignment Agent recommends an available team member for each open, unassigned task.
+3. Risk Analysis Agent flags unassigned high-priority work, stale tasks, and capacity problems.
+4. Project Assistant creates a concise project-health briefing.
+5. SprintMind Orchestrator runs the agents and returns one structured result.
+
+Microsoft Teams is ready as an isolated connector. It will post the Project Assistant briefing after a Teams webhook is configured.
 
 ## GitHub Actions setup
 
@@ -18,6 +24,4 @@ SPRINTMIND_TEAM must be a single-line JSON array. Example:
 
 [{"id":"developer-a","displayName":"Developer A","capacity":3,"skills":["frontend","react"]},{"id":"developer-b","displayName":"Developer B","capacity":2,"skills":["backend","node"]}]
 
-Use the Jira account ID as id when you later want SprintMind to write assignments. Capacity is the maximum number of simultaneous open tasks. Skills match Jira issue labels.
-
-The Task Assignment Agent only recommends assignees for open, currently unassigned issues. It does not change Jira tickets.
+The Task Assignment Agent only recommends assignees. It does not change Jira tickets.
