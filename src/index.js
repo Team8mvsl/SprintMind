@@ -2,19 +2,20 @@ import { loadConfig } from "./core/config.js";
 import { JiraClient } from "./connectors/jira/jira-client.js";
 import { JiraTicketAgent } from "./agents/ticket-agent.js";
 import { TaskAssignmentAgent } from "./agents/task-assignment-agent.js";
-import { AgentRegistry } from "./orchestrator/agent-registry.js";
+import { RiskAnalysisAgent } from "./agents/risk-analysis-agent.js";
+import { ProjectAssistantAgent } from "./agents/project-assistant-agent.js";
+import { SprintMindOrchestrator } from "./orchestrator/sprintmind-orchestrator.js";
 
 async function main() {
   const config = loadConfig();
-  const jira = new JiraClient(config.jira);
-  const ticketAgent = new JiraTicketAgent(jira, config.jira.projectKey);
-  const taskAssignmentAgent = new TaskAssignmentAgent();
-  const registry = new AgentRegistry()
-    .register("ticket-agent", ticketAgent)
-    .register("task-assignment-agent", taskAssignmentAgent);
-  const projectSnapshot = await registry.get("ticket-agent").getProjectSnapshot();
-  const assignmentPlan = registry.get("task-assignment-agent").recommend(projectSnapshot, config.team);
-  console.log(JSON.stringify({ projectSnapshot, assignmentPlan }, null, 2));
+  const ticketAgent = new JiraTicketAgent(new JiraClient(config.jira), config.jira.projectKey);
+  const orchestrator = new SprintMindOrchestrator({
+    ticketAgent,
+    taskAssignmentAgent: new TaskAssignmentAgent(),
+    riskAnalysisAgent: new RiskAnalysisAgent(),
+    projectAssistantAgent: new ProjectAssistantAgent()
+  });
+  console.log(JSON.stringify(await orchestrator.run(config.team), null, 2));
 }
 
 main().catch((error) => { console.error(error.message); process.exitCode = 1; });
