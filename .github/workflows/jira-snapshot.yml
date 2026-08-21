@@ -30,4 +30,4 @@ jobs:
         run: npm test
 
       - name: Read Jira and recommend assignments
-        run: npm start
+        run: node src/index.js
