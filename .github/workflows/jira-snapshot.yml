@@ -1,4 +1,4 @@
-name: Jira Ticket Agent
+name: SprintMind Jira and Assignment Agents
 
 on:
   workflow_dispatch:
@@ -7,14 +7,15 @@ permissions:
   contents: read
 
 jobs:
-  fetch-jira-snapshot:
-    name: Fetch SCRUM project snapshot
+  build-project-plan:
+    name: Read SCRUM and recommend assignments
     runs-on: ubuntu-latest
     env:
       JIRA_BASE_URL: ${{ vars.JIRA_BASE_URL }}
       JIRA_EMAIL: ${{ vars.JIRA_EMAIL }}
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       JIRA_PROJECT_KEY: ${{ vars.JIRA_PROJECT_KEY }}
+      SPRINTMIND_TEAM: ${{ vars.SPRINTMIND_TEAM }}
 
     steps:
       - name: Check out SprintMind
@@ -25,8 +26,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify Ticket Agent
+      - name: Verify agents
         run: npm test
 
-      - name: Fetch Jira project snapshot
+      - name: Read Jira and recommend assignments
         run: npm start
